@@ -1,7 +1,7 @@
 from sqlalchemy import String, Integer
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
+from .base import Base
 
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
