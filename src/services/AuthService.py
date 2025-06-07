@@ -52,5 +52,3 @@ class AuthService:
                 return user
         except:
             return False
-        
-    
