@@ -1,4 +1,4 @@
-from AuthService import AuthService
+from services.AuthService import AuthService
 from repositories.UserRepository import UserRepository
 from models.user import User
 
@@ -8,10 +8,10 @@ class UserService:
         self.user_repo = UserRepository()
         self.auth_service = AuthService()
 
-    def sign_in(self, user_name, passwd):
+    def sign_in(self, user_name: str, passwd: str) -> User | None:
         return self.auth_service.sign_in(user_name, passwd)
     
-    def sign_up(self, user_name, passwd, phone_number):
+    def sign_up(self, user_name: str, passwd: str, phone_number: str):
         return self.auth_service.register(user_name, passwd, phone_number)
     
     def update(self, user: User, new_username=None, new_passwd=None, new_phone=None, new_pic = None):
@@ -26,9 +26,29 @@ class UserService:
         user.profile_pic = new_pic
 
         self.user_repo.update_user(user)
-            
 
+    def find_user(self, user_name: str) -> User | None:
+        try:
+            user = self.user_repo.get_user(user_name)
+            if user:
+                return user
+            else:
+                return None
+        except Exception:
+            return None
 
-    
-
-    
+    def find_user_by_phone(self, phone_number: str):
+        try:
+            user = self.user_repo.get_user_by_phone(phone_number)
+            if user:
+                return user
+            else:
+                return None
+        except Exception:
+            return None
+        
+    def add_contact(self, user: User, contact: User) -> bool:
+        return self.user_repo.add_contact(user, contact)
+        
+    def get_contact(self, user: User) -> list[User]:
+        return self.user_repo.get_contacts(user)
