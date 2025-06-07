@@ -17,8 +17,3 @@ class DatabaseManager:
 
     def get_session(self):
         return self.SessionLocal()
-    
-
-if __name__=='__main__':
-    db = DatabaseManager()
-    db.create_tables()
