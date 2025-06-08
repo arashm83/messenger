@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.venv
+venv/
+ENV/
+env/
+*.sqlite3
+*.db
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Migrations (if using alembic or similar)
+migrations/
+alembic/
+
+# Local settings
+*.local
+
+# Test/coverage
+htmlcov/
+.coverage
+.cache
+.pytest_cache/
