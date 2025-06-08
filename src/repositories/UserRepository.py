@@ -21,7 +21,6 @@ class UserRepository:
             session.commit()
             return True
         except Exception as e:
-            print(e)
             session.rollback()
             return False
         finally:
