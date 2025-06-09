@@ -55,6 +55,12 @@ class UserRepository:
         session.close()
         return user
     
+    def get_user_by_id(self, id) -> User | None:
+        session = self.db.get_session()
+        user = session.query(User).filter(User.id == id).first()
+        session.close()
+        return user
+    
     def add_contact(self, user: User, contact: User):
         session = self.db.get_session()
         con = Contact(user_id = user.id, contact_id = contact.id)
