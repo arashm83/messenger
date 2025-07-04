@@ -42,7 +42,7 @@ class AuthService:
                 return False, "Username Already Exists"
             
             if self.user_repo.add_user(User(user_name=user_name, passwd_hash=self.get_hash(passwd), phone_number=phone_number)):
-                return True, None
+                return True, 'Registeration Succesfull'
         return False, err
         
     def sign_in(self, user_name, passwd) -> User | None:

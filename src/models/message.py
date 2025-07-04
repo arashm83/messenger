@@ -26,11 +26,14 @@ class Message(Base):
 
     @staticmethod
     def deserialize(json_str: str):
-        data = json.loads(json_str)
-        return Message(
-            id=data.get("id"),
-            content=data.get("content"),
-            sender_id=data.get("sender_id"),
-            receiver_id=data.get("receiver_id"),
-            timestamp=datetime.fromisoformat(data["timestamp"]) if data.get("timestamp") else None
-        )
+        try:
+            data = json.loads(json_str)
+            return Message(
+                id=data.get("id"),
+                content=data.get("content"),
+                sender_id=data.get("sender_id"),
+                receiver_id=data.get("receiver_id"),
+                timestamp=datetime.fromisoformat(data["timestamp"]) if data.get("timestamp") else None
+            )
+        except Exception:
+            return None
