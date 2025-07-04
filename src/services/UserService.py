@@ -23,7 +23,7 @@ class UserService:
             if new_phone and not self.auth_service.validate_phone_number(new_phone):
                 return False, 'invalid phone number format'
 
-            updated_username = new_username if new_username else user.username
+            updated_username = new_username if new_username else user.user_name
             updated_passwd_hash = self.auth_service.get_hash(new_passwd) if new_passwd else user.passwd_hash
             updated_phone = new_phone if new_phone else user.phone_number
             updated_pic = new_pic if new_pic else user.profile_pic

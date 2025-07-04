@@ -146,7 +146,7 @@ class ChatWindow(QWidget):
         dialog.exec()
 
     def open_add_contact(self):
-        dialog = AddContactDialog(self)
+        dialog = AddContactDialog(self, self.current_user)
         dialog.contact_added.connect(self.refresh_contact_list)
         dialog.exec()
         

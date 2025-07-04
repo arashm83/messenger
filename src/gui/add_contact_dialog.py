@@ -4,12 +4,15 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QLineEdit, QPushButton,
                              QLabel, QMessageBox)
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import pyqtSignal
+from services.UserService import UserService
 
 class AddContactDialog(QDialog):
     contact_added = pyqtSignal()
+    user_service = UserService()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, current_user=None):
         super().__init__(parent)
+        self.current_user = current_user
         self.setWindowTitle("Add Contact")
         self.setFixedSize(400, 250)
         self._setup_ui()
@@ -46,13 +49,19 @@ class AddContactDialog(QDialog):
             QMessageBox.warning(self, "Input Error", "Username and Phone Number are required.")
             return
 
-        # TODO: Connect to a service to find and add the contact
-        # success, message = contact_service.add_contact(current_user, username, phone)
-        success, message = True, f"User {username} added to contacts!" # Placeholder for testing
-        
+        contact = self.user_service.find_user(username)
+        if not contact:
+            QMessageBox.critical(self, "Error", 'User not found')
+            return
+
+        if contact.phone_number != phone:
+            QMessageBox.critical(self, "Error", 'Phone number does not match user credentials')
+            return
+        success= self.user_service.add_contact(self.current_user, contact)
+
         if success:
-            QMessageBox.information(self, "Success", message)
+            QMessageBox.information(self, "Success", 'Contact added successfully')
             self.contact_added.emit()
             self.accept()
         else:
-            QMessageBox.critical(self, "Error", message)
+            QMessageBox.critical(self, "Error", 'Failed to add contact')
