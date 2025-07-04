@@ -8,11 +8,13 @@ from PyQt6.QtCore import Qt, QSize
 from .settings_window import SettingsWindow
 from .add_contact_dialog import AddContactDialog
 from .profile_window import ProfileWindow
+from services.UserService import UserService
 
 class ChatWindow(QWidget):
     def __init__(self, username):
         super().__init__()
-        self.current_user = username
+        self.user_service = UserService()
+        self.current_user = self.user_service.find_user(username)
         self.current_user_data = {}
         self.current_chat_partner = None
         self._setup_ui()
@@ -120,13 +122,7 @@ class ChatWindow(QWidget):
         main_layout.addWidget(right_panel, 1)
 
     def _load_initial_data(self):
-        self.current_user_data = {
-            "username": self.current_user,
-            "phone": "09123456789",
-            "picture": "assets/default_profile.png"
-        }
-        
-        profile_icon = self._create_circular_icon(self.current_user_data["picture"])
+        profile_icon = self._create_circular_icon(self.current_user.profile_pic)
         self.profile_button.setIcon(profile_icon)
         
         self.refresh_contact_list()
@@ -141,11 +137,11 @@ class ChatWindow(QWidget):
         self.chat_display.append(f"--- Chat history with {self.current_chat_partner} ---")
         
     def open_profile_window(self):
-        dialog = ProfileWindow(self.current_user_data, self)
+        dialog = ProfileWindow(self.current_user, self)
         dialog.exec()
 
     def open_settings(self):
-        dialog = SettingsWindow(self.current_user_data, self)
+        dialog = SettingsWindow(self.current_user, self)
         dialog.profile_updated.connect(self.refresh_user_data)
         dialog.exec()
 

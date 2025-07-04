@@ -5,13 +5,16 @@ from PyQt6.QtCore import pyqtSignal, Qt, QFile
 from PyQt6.QtGui import QFont, QPixmap
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QLineEdit, 
                              QPushButton, QLabel, QMessageBox, QFileDialog, QFrame)
+from models.user import User
+from services.UserService import UserService
 
 class SettingsWindow(QDialog):
     profile_updated = pyqtSignal()
+    user_service = UserService()
 
-    def __init__(self, current_user_data, parent=None):
+    def __init__(self, user: User, parent=None):
         super().__init__(parent)
-        self.current_user_data = current_user_data
+        self.user = user
         self.new_profile_pic_path = None
         
         self.setWindowTitle("Settings")
@@ -62,10 +65,10 @@ class SettingsWindow(QDialog):
         layout.addWidget(self.save_button)
 
     def _load_user_data(self):
-        self.username_input.setText(self.current_user_data.get("username", ""))
-        self.phone_input.setText(self.current_user_data.get("phone", ""))
+        self.username_input.setText(self.user.user_name)
+        self.phone_input.setText(self.user.phone_number)
         
-        profile_pic_path = self.current_user_data.get("picture", "assets/default_profile.png")
+        profile_pic_path = self.user.profile_pic or 'assets/default_profile.png'
         if os.path.exists(profile_pic_path):
             pixmap = QPixmap(profile_pic_path)
             self.profile_pic_label.setPixmap(pixmap.scaled(128, 128, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
@@ -80,14 +83,14 @@ class SettingsWindow(QDialog):
     def handle_save_changes(self):
         new_username = self.username_input.text()
         new_password = self.new_password_input.text()
+        new_phone = self.phone_input.text()
         confirm_password = self.confirm_password_input.text()
 
         if new_password != confirm_password:
             QMessageBox.warning(self, "Password Error", "New passwords do not match.")
             return
 
-        # TODO: Connect to UserService to save profile changes.
-        success, message = True, "Profile updated successfully!"
+        success, message = self.user_service.update(self.user, new_username, new_password, new_phone)
 
         if success:
             if self.new_profile_pic_path:
@@ -102,7 +105,7 @@ class SettingsWindow(QDialog):
                         # If copying fails, show the file error.
                         raise IOError(source_file.errorString())
 
-                    # TODO: The new picture path (dest_path) must be saved in the database.
+                    self.user_service.update(self.user, new_pic=dest_path)
                 except Exception as e:
                     QMessageBox.warning(self, "Error", f"Could not save new profile picture:\n{e}")
                     return

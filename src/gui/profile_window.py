@@ -4,11 +4,12 @@ import os
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QWidget)
 from PyQt6.QtGui import QFont, QPixmap
 from PyQt6.QtCore import Qt
+from models.user import User
 
 class ProfileWindow(QDialog):
-    def __init__(self, user_data, parent=None):
+    def __init__(self, user: User, parent=None):
         super().__init__(parent)
-        self.user_data = user_data
+        self.user = user
 
         self.setWindowTitle("User Profile")
         self.setFixedSize(350, 450)
@@ -26,7 +27,7 @@ class ProfileWindow(QDialog):
         self.pic_label.setFixedSize(150, 150)
         self.pic_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        profile_pic_path = self.user_data.get("picture", "assets/default_profile.png")
+        profile_pic_path = self.user.profile_pic or 'assets/default_profile.png'
         if os.path.exists(profile_pic_path):
             pixmap = QPixmap(profile_pic_path)
             self.pic_label.setPixmap(
@@ -34,12 +35,12 @@ class ProfileWindow(QDialog):
             )
 
         # Username Label
-        self.username_label = QLabel(f"Username: {self.user_data.get('username', 'N/A')}")
+        self.username_label = QLabel(f"Username: {self.user.user_name}")
         self.username_label.setFont(QFont("Arial", 12))
         self.username_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         # Phone Number Label
-        self.phone_label = QLabel(f"Phone: {self.user_data.get('phone', 'N/A')}")
+        self.phone_label = QLabel(f"Phone: {self.user.phone_number}")
         self.phone_label.setFont(QFont("Arial", 12))
         self.phone_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
