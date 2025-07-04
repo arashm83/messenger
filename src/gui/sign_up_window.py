@@ -3,10 +3,12 @@
 from PyQt6.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QFrame)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
+from services.UserService import UserService
 
 class SignUpWindow(QWidget):
     signup_successful = pyqtSignal()
     go_to_signin = pyqtSignal()
+    user_service = UserService()
 
     def __init__(self):
         super().__init__()
@@ -77,9 +79,8 @@ class SignUpWindow(QWidget):
             QMessageBox.warning(self, "Password Error", "Passwords do not match.")
             return
             
-        # TODO: Connect to UserService to register the user
-        # success, message = user_service.register_user(username, phone, password)
-        success, message = True, "Registration successful!"  # Placeholder for testing
+        
+        success, message = self.user_service.sign_up(username, password, phone)
 
         if success:
             QMessageBox.information(self, "Success", message)

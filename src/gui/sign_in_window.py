@@ -2,11 +2,17 @@ from PyQt6.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayou
                              QMessageBox, QFrame)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
+from services.UserService import UserService
 
 class SignInWindow(QWidget):
     
     login_successful = pyqtSignal(str)  
     go_to_signup = pyqtSignal()
+    user_service = UserService()
+
+    def __init__(self):
+        super().__init__()
+        self._setup_ui()
 
     def __init__(self):
         super().__init__()
@@ -60,11 +66,9 @@ class SignInWindow(QWidget):
             QMessageBox.warning(self, "Input Error", "Username and password cannot be empty.")
             return
 
-        # TODO: Connect to UserService to validate user credentials
-        # is_valid = user_service.validate_credentials(username, password)
-        is_valid = True  # Placeholder for testing
+        user = self.user_service.sign_in(username, password)
 
-        if is_valid:
+        if user:
             self.login_successful.emit(username)
         else:
             QMessageBox.critical(self, "Login Failed", "Invalid username or password.")
