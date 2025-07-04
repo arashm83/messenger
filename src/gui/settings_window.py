@@ -100,6 +100,10 @@ class SettingsWindow(QDialog):
                     _, ext = os.path.splitext(self.new_profile_pic_path)
                     dest_path = os.path.join(dest_folder, f"{new_username}{ext}")
                     
+                    # Remove existing file if it exists to avoid copy errors
+                    if os.path.exists(dest_path):
+                        os.remove(dest_path)
+
                     source_file = QFile(self.new_profile_pic_path)
                     if not source_file.copy(dest_path):
                         # If copying fails, show the file error.
