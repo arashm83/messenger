@@ -9,13 +9,19 @@ from .settings_window import SettingsWindow
 from .add_contact_dialog import AddContactDialog
 from .profile_window import ProfileWindow
 from services.UserService import UserService
+from services.socketmanager import SocketManager
+from repositories.messagerepository import MessageRepository
+from models.message import Message
+from threading import Thread
+from datetime import datetime, timezone
 
 class ChatWindow(QWidget):
     def __init__(self, username):
         super().__init__()
         self.user_service = UserService()
+        self.socket_manager = SocketManager()
+        self.message_repository = MessageRepository()
         self.current_user = self.user_service.find_user(username)
-        self.current_user_data = {}
         self.current_chat_partner = None
         self._setup_ui()
         self._load_initial_data()
@@ -49,13 +55,13 @@ class ChatWindow(QWidget):
 
         left_panel = QWidget()
         left_panel.setFixedWidth(300)
-        left_panel.setStyleSheet("background-color: #2c3e50;")
+        #left_panel.setStyleSheet("background-color: #2c3e50;")
         left_panel_layout = QVBoxLayout(left_panel)
         left_panel_layout.setContentsMargins(0,0,0,0)
         left_panel_layout.setSpacing(0)
 
         top_bar = QWidget()
-        top_bar.setStyleSheet("background-color: #34495e;")
+        #top_bar.setStyleSheet("background-color: #34495e;")
         top_bar_layout = QHBoxLayout(top_bar)
         top_bar_layout.setContentsMargins(0,0,0,0)
         top_bar_layout.setSpacing(0)
@@ -68,7 +74,7 @@ class ChatWindow(QWidget):
 
         for button in buttons:
             button.setIconSize(QSize(48, 48)) 
-            button.setStyleSheet("border: none; background-color: transparent;")
+            #button.setStyleSheet("border: none; background-color: transparent;")
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             top_bar_layout.addWidget(button, 1)
         
@@ -88,13 +94,13 @@ class ChatWindow(QWidget):
         left_panel_layout.addWidget(self.contacts_list)
 
         right_panel = QWidget()
-        right_panel.setStyleSheet("background-color: #ecf0f1;")
+        #right_panel.setStyleSheet("background-color: #ecf0f1;")
         right_panel_layout = QVBoxLayout(right_panel)
         right_panel_layout.setContentsMargins(0,0,0,0)
         right_panel_layout.setSpacing(0)
         
         chat_header = QWidget()
-        chat_header.setStyleSheet("background-color: #bdc3c7; padding: 10px;")
+        #chat_header.setStyleSheet("background-color: #bdc3c7; padding: 10px;")
         chat_header_layout = QHBoxLayout(chat_header)
         self.chat_partner_label = QLabel("Select a contact to start chatting")
         self.chat_partner_label.setFont(QFont("Arial", 12, QFont.Weight.Bold))
@@ -110,7 +116,8 @@ class ChatWindow(QWidget):
         self.message_input.setFixedHeight(40)
         self.send_button = QPushButton("Send")
         self.send_button.setFixedHeight(40)
-        
+        self.send_button.clicked.connect(self.send_message)
+
         message_input_layout.addWidget(self.message_input)
         message_input_layout.addWidget(self.send_button)
         
@@ -127,15 +134,24 @@ class ChatWindow(QWidget):
         
         self.refresh_contact_list()
 
-    def contact_selected(self, current_item, previous_item):
+    def contact_selected(self, current_item):
         if not current_item:
             return
 
-        self.current_chat_partner = current_item.text()
-        self.chat_partner_label.setText(f"Chat with {self.current_chat_partner}")
+        self.current_chat_partner = self.user_service.find_user(current_item.text())
+        self.socket_manager.connect(self.current_user)
+        self.chat_partner_label.setText(f"Chat with {self.current_chat_partner.user_name}")
         self.chat_display.clear()
-        self.chat_display.append(f"--- Chat history with {self.current_chat_partner} ---")
-        
+        self.load_messages()
+        receive_thread = Thread(target=self.receive_messages, daemon=True)
+        receive_thread.start()
+
+    def receive_messages(self):
+        while self.socket_manager.running:
+            message = self.socket_manager.receive_message()
+            if message:
+                self.show_message(message)
+
     def open_profile_window(self):
         dialog = ProfileWindow(self.current_user, self)
         dialog.exec()
@@ -155,9 +171,29 @@ class ChatWindow(QWidget):
         
     def refresh_contact_list(self):
         self.contacts_list.clear()
-        contacts = ["Parsa", "Arian", "Arman"] 
+        contacts = self.user_service.get_contact(self.current_user)
         for contact in contacts:
-            item = QListWidgetItem(contact)
-            item.setIcon(QIcon("assets/default_profile.png"))
+            item = QListWidgetItem(contact.user_name)
+            item.setIcon(QIcon(contact.profile_pic or 'assets/default_profile.png'))
             item.setSizeHint(QSize(item.sizeHint().width(), 60))
             self.contacts_list.addItem(item)
+
+    def show_message(self, message: Message):
+        sender = self.user_service.find_user_by_id(message.sender_id)
+        time = f'{message.timestamp.hour}:{message.timestamp.minute}'
+        sender_name = 'You' if sender.id == self.current_user.id else sender.user_name
+        if sender:
+            self.chat_display.append(f'{time} - {sender_name}: {message.content}')
+
+    def send_message(self):
+        message = self.message_input.text()
+        if message and self.current_chat_partner:
+            self.socket_manager.send(message, self.current_user, self.current_chat_partner)
+            self.show_message(Message(content=message, sender_id=self.current_user.id, receiver_id=self.current_chat_partner.id, timestamp=datetime.now(timezone.utc)))
+            self.message_input.clear()
+
+    def load_messages(self):
+        if self.current_chat_partner:
+            messages = self.message_repository.get_messages(self.current_user.id, self.current_chat_partner.id)
+            for message in messages:
+                self.show_message(message)
