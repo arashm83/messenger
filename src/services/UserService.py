@@ -1,7 +1,10 @@
 from services.AuthService import AuthService
 from repositories.UserRepository import UserRepository
 from models.user import User
+from functions.singleton import singleton
 
+
+@singleton
 class UserService:
 
     def __init__(self):
@@ -64,7 +67,17 @@ class UserService:
                 return None
         except Exception:
             return None
-        
+
+    def find_user_by_id(self, user_id: str):
+        try:
+            user = self.user_repo.get_user_by_id(user_id)
+            if user:
+                return user
+            else:
+                return None
+        except Exception:
+            return None
+
     def add_contact(self, user: User, contact: User) -> bool:
         return self.user_repo.add_contact(user, contact)
         
