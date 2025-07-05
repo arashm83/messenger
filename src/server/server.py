@@ -40,7 +40,7 @@ class Server:
                 client_sock, client_addr = self.socket.accept()
                 client_sock.send('USER_NAME_REQUEST'.encode("utf-8"))
                 client_sock.settimeout(10)
-                user_name = client_sock.recv(1024).decode().strip()
+                user_name = client_sock.recv(1024).decode().strip() 
                 if not user_name:
                     raise ValueError('empty username')
                 client_sock.settimeout(None)
@@ -78,7 +78,8 @@ class Server:
                     mesg = conn.recv(1024).decode()
                     if not mesg:
                         print(f'Connection closed by {user_name}')
-                        break
+                        raise ConnectionResetError
+                        
                     
                     formated_mesg = Message.deserialize(mesg)
                     self.send(formated_mesg)
@@ -86,17 +87,12 @@ class Server:
                 except Exception as e:
                     print(f'Error handling message from {user_name}: {e}')
                     break
+                except (ConnectionResetError, ConnectionAbortedError):
+                    self.delete_client(user_name)
         except Exception as e:
             print(f'Unexpected error in handle_client for {user_name}: {e}')
         finally:
-            with self.lock:
-                if user_name in self.clients:
-                    del self.clients[user_name]
-            try:
-                conn.close()
-            except Exception:
-                pass
-            print(f'Connection with {user_name} closed.')
+            self.delete_client(user_name)
 
     def send(self, mesg: Message):
         receiver_user = self.user_repo.get_user_by_id(mesg.receiver_id)
@@ -119,11 +115,27 @@ class Server:
             else:
                 print(f'Client socket for {receiver_name} not found.')
 
+    def delete_client(self, user_name):
+        with self.lock:
+            if user_name in self.clients.keys():
+                try:
+                    self.clients[user_name].close()
+                    del self.clients[user_name]
+                    print(f'client {user_name} disconnected')
+                except:
+                    pass
+                    
+
     def handle_server_commands(self):
         while True:
             com = input()
             if com == 'SHUTDOWN':
-                break
+                for client_socket in self.clients.values():
+                    try:
+                        client_socket.send("shutting down the server")
+                        client_socket.close()
+                    except:
+                        pass
 
 if __name__== '__main__':
     server = Server()
