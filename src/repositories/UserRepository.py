@@ -1,8 +1,10 @@
 from models.user import User
 from models.contact import Contact
 from database.databasemanager import DatabaseManager
+from functions.singleton import singleton
 
 
+@singleton
 class UserRepository:
 
     def __init__(self):

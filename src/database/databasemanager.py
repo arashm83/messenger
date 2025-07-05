@@ -4,10 +4,12 @@ from  models.base import Base
 import models.user
 import models.message
 import models.contact
+from functions.singleton import singleton
 
 
+@singleton
 class DatabaseManager:
-    def __init__(self, db_url="sqlite:///database/messenger.db"):
+    def __init__(self, db_url="sqlite:///src/database/messenger.db"):
         self.engine = create_engine(db_url, echo=False, future=True)
         self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
 

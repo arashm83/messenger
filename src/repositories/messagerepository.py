@@ -1,6 +1,8 @@
 from database.databasemanager import DatabaseManager
 from models.message import Message
+from functions.singleton import singleton
 
+@singleton
 class MessageRepository:
 
     def __init__(self):

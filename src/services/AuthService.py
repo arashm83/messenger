@@ -2,7 +2,9 @@ from hashlib import sha256
 from repositories.UserRepository import UserRepository
 from models.user import User
 import re
+from functions.singleton import singleton
 
+@singleton
 class AuthService:
 
     def __init__(self):
