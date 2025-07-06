@@ -149,7 +149,7 @@ class ChatWindow(QWidget):
     def receive_messages(self):
         while self.socket_manager.running:
             message = self.socket_manager.receive_message()
-            if message:
+            if message and self.current_chat_partner.id == message.sender_id:
                 self.show_message(message)
 
     def open_profile_window(self):
