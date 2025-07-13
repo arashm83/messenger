@@ -114,6 +114,9 @@ class ChatWindow(QWidget):
         message_input_layout = QHBoxLayout()
         self.message_input = QLineEdit()
         self.message_input.setPlaceholderText("Type a message...")
+
+        self.message_input.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+
         self.message_input.setFixedHeight(40)
         self.send_button = QPushButton("Send")
         self.send_button.setFixedHeight(40)
