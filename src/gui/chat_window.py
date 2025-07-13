@@ -25,6 +25,7 @@ class ChatWindow(QWidget):
         self.current_chat_partner = None
         self._setup_ui()
         self._load_initial_data()
+        self.socket_manager.connect(self.current_user)
 
     def _create_circular_icon(self, image_path, size=48):
         source_pixmap = QPixmap(image_path)
@@ -116,6 +117,7 @@ class ChatWindow(QWidget):
         self.message_input.setFixedHeight(40)
         self.send_button = QPushButton("Send")
         self.send_button.setFixedHeight(40)
+        self.message_input.returnPressed.connect(self.send_button.click) 
         self.send_button.clicked.connect(self.send_message)
 
         message_input_layout.addWidget(self.message_input)
@@ -139,7 +141,6 @@ class ChatWindow(QWidget):
             return
 
         self.current_chat_partner = self.user_service.find_user(current_item.text())
-        self.socket_manager.connect(self.current_user)
         self.chat_partner_label.setText(f"Chat with {self.current_chat_partner.user_name}")
         self.chat_display.clear()
         self.load_messages()
