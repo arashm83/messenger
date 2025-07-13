@@ -51,8 +51,8 @@ Make sure you have Python 3.10 or newer installed on your system.
 
 1.  **Clone the repository**
     ```sh
-    git clone <your-repository-url>
-    cd <repository-folder>
+    git clone https://github.com/arashm83/messenger
+    cd messenger
     ```
 
 2.  **Create a virtual environment (recommended)**
