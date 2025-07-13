@@ -187,7 +187,11 @@ class ChatWindow(QWidget):
         time = f'{message.timestamp.hour}:{message.timestamp.minute}'
         sender_name = 'You' if sender.id == self.current_user.id else sender.user_name
         if sender:
-            self.chat_display.append(f'{time} - {sender_name}: {message.content}')
+            msg_text = f'{time} - {sender_name}: {message.content}'
+            if sender.id == self.current_user.id:
+                self.chat_display.append(f'<span style="color: #1abc9c;">{msg_text}</span>')
+            else:
+                self.chat_display.append(msg_text)
 
     def send_message(self):
         message = self.message_input.text()
