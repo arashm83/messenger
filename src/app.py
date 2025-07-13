@@ -1,13 +1,13 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 from gui.main_window import MainWindow
+#from database.databasemanager import DatabaseManager
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     
-    # TODO: Initialize services (UserService, etc.) and repositories here.
-    # Pass them to the MainWindow if needed.
-    
+    #db = DatabaseManager()
+    #db.create_tables()
     main_win = MainWindow()
     main_win.show()
     
