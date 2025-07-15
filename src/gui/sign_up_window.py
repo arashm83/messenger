@@ -15,7 +15,6 @@ class SignUpWindow(QWidget):
         self._setup_ui()
 
     def _setup_ui(self):
-        self.setWindowTitle("Messenger - Sign Up")
         
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(50, 50, 50, 50)
