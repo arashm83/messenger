@@ -14,13 +14,8 @@ class SignInWindow(QWidget):
         super().__init__()
         self._setup_ui()
 
-    def __init__(self):
-        super().__init__()
-        self._setup_ui()
-
     def _setup_ui(self):
-        self.setWindowTitle("Messenger - Sign In")
-        
+       
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(50, 50, 50, 50)
         main_layout.setSpacing(15)
